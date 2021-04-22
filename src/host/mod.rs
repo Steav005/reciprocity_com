@@ -1,11 +1,11 @@
 use oauth2::basic::{BasicClient, BasicErrorResponse};
 
 use oauth2::reqwest::async_http_client;
-use oauth2::{AuthUrl, AuthorizationCode, ClientId, ClientSecret, TokenResponse, TokenUrl, RefreshToken, AccessToken, RequestTokenError, RedirectUrl, HttpRequest};
+use oauth2::{AuthUrl, ClientId, ClientSecret, TokenResponse, TokenUrl, RefreshToken, AccessToken, RequestTokenError, RedirectUrl, HttpRequest};
 use oauth2::url::{ParseError, Url};
 use oauth2::http::{Method, HeaderMap, StatusCode};
 use oauth2::http::header::InvalidHeaderValue;
-use crate::messages::User;
+use crate::messages::{User, Auth};
 pub use reqwest;
 
 #[derive(Debug)]
@@ -49,12 +49,7 @@ impl From<serde_json::Error> for OAuthError{
     }
 }
 
-pub enum Access{
-    Refresh(RefreshToken),
-    Code(AuthorizationCode)
-}
-
-pub async fn get_token(access: Access) -> Result<(AccessToken, RefreshToken), OAuthError> {
+pub async fn get_token(access: Auth) -> Result<(AccessToken, RefreshToken), OAuthError> {
     //TODO LOG
     //TODO Get Values from Config
 
@@ -67,10 +62,10 @@ pub async fn get_token(access: Access) -> Result<(AccessToken, RefreshToken), OA
         .set_redirect_uri(RedirectUrl::new("http://localhost:1887".to_string())?);
 
     let resp = match access {
-        Access::Refresh(re) => {
+        Auth::Token(re) => {
             client.exchange_refresh_token(&re).request_async(async_http_client).await?
         }
-        Access::Code(c) => {
+        Auth::Code(c) => {
             client.exchange_code(c).request_async(async_http_client).await?
         }
     };

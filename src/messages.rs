@@ -11,7 +11,7 @@ pub enum Message {
     ClientRequest(ClientRequest),
     Auth(AuthMessage),
     PlayerState(Option<State>),
-    UserVoiceState(VoiceState),
+    UserVoiceState(Option<VoiceState>),
     Unexpected(Unexpected)
 }
 
@@ -65,7 +65,7 @@ pub enum Unexpected{
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub enum AuthMessage{
     AuthStatus(bool),
-    AuthSuccess(User),
+    AuthSuccess(User, RefreshToken),
     AuthError(),
 }
 
@@ -79,8 +79,6 @@ pub enum State{
 pub enum ClientRequest {
     Authenticate(Auth),
     AuthStatus(),
-    FullPlayerState(),
-    VoiceState(),
     Control(PlayerControl),
     End()
 }
@@ -147,5 +145,4 @@ pub struct User{
 pub struct VoiceState{
     pub channel_id: u64,
     pub channel_name: String,
-    pub bot_in_channel: bool,
 }
