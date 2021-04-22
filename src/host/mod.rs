@@ -1,12 +1,12 @@
 use oauth2::basic::{BasicClient, BasicErrorResponse};
 
-// Alternatively, this can be `oauth2::curl::http_client` or a custom client.
 use oauth2::reqwest::async_http_client;
 use oauth2::{AuthUrl, AuthorizationCode, ClientId, ClientSecret, TokenResponse, TokenUrl, RefreshToken, AccessToken, RequestTokenError, RedirectUrl, HttpRequest};
 use oauth2::url::{ParseError, Url};
 use oauth2::http::{Method, HeaderMap, StatusCode};
 use oauth2::http::header::InvalidHeaderValue;
 use crate::messages::User;
+pub use reqwest;
 
 #[derive(Debug)]
 pub enum OAuthError {
