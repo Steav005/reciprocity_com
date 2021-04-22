@@ -10,7 +10,8 @@ use url::Url;
 pub enum Message {
     ClientRequest(ClientRequest),
     Auth(AuthMessage),
-    State(State)
+    State(State),
+    Unexpected()
 }
 
 pub enum PatchError{
@@ -31,6 +32,20 @@ impl Message{
     pub fn generate_patch(old: &PlayerState, new: &PlayerState) -> Result<Vec<u8>, rmp_serde::encode::Error>{
         rmp_serde::to_vec(&Diff::serializable(old, new))
     }
+
+    pub fn generate(&self) -> Result<Vec<u8>, rmp_serde::encode::Error>{
+        rmp_serde::to_vec(self)
+    }
+
+    pub fn parse(bin: &[u8]) -> Result<Self, rmp_serde::decode::Error>{
+        rmp_serde::from_read(bin)
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub enum Unexpected{
+    WsMessageTypeString(),
+    ParseError()
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
