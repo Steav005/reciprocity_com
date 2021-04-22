@@ -9,7 +9,7 @@ pub enum Message {
     ClientRequest(ClientRequest),
     Auth(AuthMessage),
     State(State),
-    Unexpected()
+    Unexpected(Unexpected)
 }
 
 pub enum PatchError{
@@ -42,8 +42,8 @@ impl Message{
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub enum Unexpected{
-    WsMessageTypeString(),
-    ParseError()
+    WsMessageTypeString(String),
+    ParseError(Vec<u8>, String)
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
