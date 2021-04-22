@@ -3,6 +3,7 @@ use serde_diff::{SerdeDiff, Diff, Apply};
 use oauth2::{AuthorizationCode, RefreshToken};
 use std::time::Duration;
 use url::Url;
+pub use oauth2;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub enum Message {
