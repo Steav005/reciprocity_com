@@ -3,7 +3,7 @@ pub mod client;
 #[cfg(feature = "host")]
 pub mod host;
 
-mod messages;
+pub mod messages;
 
 
 #[cfg(test)]

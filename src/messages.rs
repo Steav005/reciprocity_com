@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use serde::{Deserialize, Serialize};
 use serde_diff::{SerdeDiff, Diff, Apply};
 use oauth2::{AuthorizationCode, RefreshToken};
