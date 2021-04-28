@@ -5,58 +5,55 @@ pub mod host;
 
 pub mod messages;
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::messages::{PlayerState, BotInfo, Track, PlayMode};
+    use crate::messages::{BotInfo, PlayMode, PlayerState, Track};
     use serde::Serialize;
+    use serde_diff::{Apply, Diff};
     use std::time::Duration;
-    use serde_diff::{Diff, Apply};
 
     #[test]
     fn diff() {
-        let old = PlayerState{
+        let old = PlayerState {
             bot: BotInfo {
                 name: "BotName".to_string(),
-                avatar: "Avatar".to_string()
+                avatar: "Avatar".to_string(),
             },
             paused: false,
             mode: PlayMode::Normal,
             current: None,
             history: vec![
-                Track{
+                Track {
                     len: Duration::from_secs(5),
                     pos: Duration::from_secs(3),
                     title: "t1".to_string(),
-                    uri: "u1".to_string()
+                    uri: "u1".to_string(),
                 },
-                Track{
+                Track {
                     len: Duration::from_secs(8),
                     pos: Duration::from_secs(2),
                     title: "t2".to_string(),
-                    uri: "u1".to_string()
-                }
+                    uri: "u1".to_string(),
+                },
             ],
-            queue: vec![]
+            queue: vec![],
         };
-        let new = PlayerState{
+        let new = PlayerState {
             bot: BotInfo {
                 name: "BotName".to_string(),
-                avatar: "Avatar".to_string()
+                avatar: "Avatar".to_string(),
             },
             paused: false,
             mode: PlayMode::Normal,
             current: None,
-            history: vec![
-                Track{
-                    len: Duration::from_secs(5),
-                    pos: Duration::from_secs(4),
-                    title: "t1".to_string(),
-                    uri: "u1".to_string()
-                }
-            ],
-            queue: vec![]
+            history: vec![Track {
+                len: Duration::from_secs(5),
+                pos: Duration::from_secs(4),
+                title: "t1".to_string(),
+                uri: "u1".to_string(),
+            }],
+            queue: vec![],
         };
         let diff = rmp_serde::to_vec(&Diff::serializable(&old, &new)).unwrap();
         let mut patch = rmp_serde::Deserializer::new(diff.as_slice());

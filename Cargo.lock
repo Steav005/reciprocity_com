@@ -828,7 +828,7 @@ dependencies = [
 
 [[package]]
 name = "reciprocity_communication"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "futures",
  "log",

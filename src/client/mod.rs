@@ -1,17 +1,17 @@
 use oauth2::basic::BasicClient;
-
 use oauth2::url::ParseError;
 use oauth2::{AuthUrl, AuthorizationCode, ClientId, CsrfToken, RedirectUrl, Scope};
+use serde::{Deserialize, Serialize};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpListener;
 use url::Url;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum OAuthError {
-    BrowserOpenError(std::io::Error),
+    BrowserOpenError(String),
     ParseError(ParseError),
-    AlreadyRunning(std::io::Error),
-    ReadLineError(std::io::Error),
+    AlreadyRunning(String),
+    ReadLineError(String),
     RequestSplitError(),
     NoCodeInResponse(),
     NoCsrfInResponse(),
@@ -47,13 +47,14 @@ pub async fn get_auth_code(cfg: Config) -> Result<AuthorizationCode, OAuthError>
         .add_extra_param("response_type", "code")
         .url();
 
-    webbrowser::open(authorize_url.as_str()).map_err(OAuthError::BrowserOpenError)?;
+    webbrowser::open(authorize_url.as_str())
+        .map_err(|e| OAuthError::BrowserOpenError(format!("{:?}", e)))?;
 
     // A very naive implementation of the redirect server.
     // 127.0.0.1:1887
     let listener = TcpListener::bind(cfg.redirect_url)
         .await
-        .map_err(OAuthError::AlreadyRunning)?;
+        .map_err(|e| OAuthError::AlreadyRunning(format!("{:?}", e)))?;
     loop {
         if let Ok((mut stream, _)) = listener.accept().await {
             let code;
@@ -65,7 +66,7 @@ pub async fn get_auth_code(cfg: Config) -> Result<AuthorizationCode, OAuthError>
                 reader
                     .read_line(&mut request_line)
                     .await
-                    .map_err(OAuthError::ReadLineError)?;
+                    .map_err(|e| OAuthError::ReadLineError(format!("{:?}", e)))?;
 
                 let redirect_url = request_line
                     .split_whitespace()
@@ -116,8 +117,9 @@ pub async fn get_auth_code(cfg: Config) -> Result<AuthorizationCode, OAuthError>
     }
 }
 
-pub struct Config{
- pub client_id: String,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Config {
+    pub client_id: String,
     pub auth_url: String,
     pub redirect_url: String,
 }

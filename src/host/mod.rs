@@ -1,11 +1,14 @@
 use oauth2::basic::{BasicClient, BasicErrorResponse};
 
-use oauth2::reqwest::async_http_client;
-use oauth2::{AuthUrl, ClientId, ClientSecret, TokenResponse, TokenUrl, RefreshToken, AccessToken, RequestTokenError, RedirectUrl, HttpRequest};
-use oauth2::url::{ParseError, Url};
-use oauth2::http::{Method, HeaderMap, StatusCode};
+use crate::messages::{Auth, User};
 use oauth2::http::header::InvalidHeaderValue;
-use crate::messages::{User, Auth};
+use oauth2::http::{HeaderMap, Method, StatusCode};
+use oauth2::reqwest::async_http_client;
+use oauth2::url::{ParseError, Url};
+use oauth2::{
+    AccessToken, AuthUrl, ClientId, ClientSecret, HttpRequest, RedirectUrl, RefreshToken,
+    RequestTokenError, TokenResponse, TokenUrl,
+};
 pub use reqwest;
 
 #[derive(Debug)]
@@ -25,8 +28,12 @@ impl From<ParseError> for OAuthError {
     }
 }
 
-impl From<RequestTokenError<oauth2::reqwest::Error<reqwest::Error>, BasicErrorResponse>> for OAuthError {
-    fn from(e: RequestTokenError<oauth2::reqwest::Error<reqwest::Error>, BasicErrorResponse>) -> Self {
+impl From<RequestTokenError<oauth2::reqwest::Error<reqwest::Error>, BasicErrorResponse>>
+    for OAuthError
+{
+    fn from(
+        e: RequestTokenError<oauth2::reqwest::Error<reqwest::Error>, BasicErrorResponse>,
+    ) -> Self {
         OAuthError::RequestError(e)
     }
 }
@@ -37,13 +44,13 @@ impl From<oauth2::reqwest::Error<reqwest::Error>> for OAuthError {
     }
 }
 
-impl From<InvalidHeaderValue> for OAuthError{
+impl From<InvalidHeaderValue> for OAuthError {
     fn from(e: InvalidHeaderValue) -> Self {
         OAuthError::InvalidHeader(e)
     }
 }
 
-impl From<serde_json::Error> for OAuthError{
+impl From<serde_json::Error> for OAuthError {
     fn from(e: serde_json::Error) -> Self {
         OAuthError::UserParseError(e)
     }
@@ -63,35 +70,47 @@ pub async fn get_token(access: Auth) -> Result<(AccessToken, RefreshToken), OAut
 
     let resp = match access {
         Auth::Token(re) => {
-            client.exchange_refresh_token(&re).request_async(async_http_client).await?
+            client
+                .exchange_refresh_token(&re)
+                .request_async(async_http_client)
+                .await?
         }
         Auth::Code(c) => {
-            client.exchange_code(c).request_async(async_http_client).await?
+            client
+                .exchange_code(c)
+                .request_async(async_http_client)
+                .await?
         }
     };
 
     let access = resp.access_token().clone();
-    let refresh = resp.refresh_token().ok_or(OAuthError::NoRefreshTokenInResponse())?.clone();
+    let refresh = resp
+        .refresh_token()
+        .ok_or(OAuthError::NoRefreshTokenInResponse())?
+        .clone();
 
     Ok((access, refresh))
 }
 
-pub async fn get_user_id(token: AccessToken) -> Result<User, OAuthError>{
+pub async fn get_user_id(token: AccessToken) -> Result<User, OAuthError> {
     //TODO Log
     //TODO Get values from config
 
     let mut headers = HeaderMap::new();
-    headers.insert("Authorization", format!("Bearer {}", token.secret()).parse()?);
+    headers.insert(
+        "Authorization",
+        format!("Bearer {}", token.secret()).parse()?,
+    );
 
-    let req = HttpRequest{
+    let req = HttpRequest {
         url: Url::parse("https://discordapp.com/api/users/@me")?,
         method: Method::GET,
         headers,
-        body: vec![]
+        body: vec![],
     };
 
     let resp = async_http_client(req).await?;
-    if resp.status_code.as_u16() != 200_u16{
+    if resp.status_code.as_u16() != 200_u16 {
         return Err(OAuthError::ResponseError(resp.status_code));
     }
     let user: User = serde_json::from_slice(resp.body.as_slice())?;
