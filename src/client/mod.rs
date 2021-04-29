@@ -78,7 +78,7 @@ pub async fn get_auth_code(cfg: Config) -> Result<AuthorizationCode, OAuthError>
                     .query_pairs()
                     .find(|pair| {
                         let &(ref key, _) = pair;
-                        key == "code"
+                        key.eq("code")
                     })
                     .ok_or(OAuthError::NoCodeInResponse())?;
 
@@ -89,7 +89,7 @@ pub async fn get_auth_code(cfg: Config) -> Result<AuthorizationCode, OAuthError>
                     .query_pairs()
                     .find(|pair| {
                         let &(ref key, _) = pair;
-                        key == "state"
+                        key.eq("state")
                     })
                     .ok_or(OAuthError::NoCsrfInResponse())?;
 
