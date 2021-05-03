@@ -74,27 +74,22 @@ pub async fn get_auth_code(cfg: Config) -> Result<AuthorizationCode, OAuthError>
                     .ok_or(OAuthError::RequestSplitError())?;
                 let url = Url::parse(&("http://localhost".to_string() + redirect_url))?;
 
-                let code_pair = url
-                    .query_pairs()
-                    .find(|pair| {
-                        let &(ref key, _) = pair;
-                        key.eq("code")
-                    })
-                    .ok_or(OAuthError::NoCodeInResponse())?;
+                let mut cd = None;
+                let mut st = None;
+                for (key, value) in url.query_pairs(){
+                    if key.eq("code"){
+                        cd = Some(value.into_owned());
+                        continue;
+                    }
+                    if key.eq("state"){
+                        st = Some(value.into_owned());
+                    }
+                };
+                let cd = cd.ok_or(OAuthError::NoCodeInResponse())?;
+                code = AuthorizationCode::new(cd);
 
-                let (_, value) = code_pair;
-                code = AuthorizationCode::new(value.into_owned());
-
-                let state_pair = url
-                    .query_pairs()
-                    .find(|pair| {
-                        let &(ref key, _) = pair;
-                        key.eq("state")
-                    })
-                    .ok_or(OAuthError::NoCsrfInResponse())?;
-
-                let (_, value) = state_pair;
-                state = CsrfToken::new(value.into_owned());
+                let st = st.ok_or(OAuthError::NoCsrfInResponse())?;
+                state = CsrfToken::new(st);
             }
 
             let message = "This page can be closed now";

@@ -7,9 +7,7 @@ pub mod messages;
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::messages::{BotInfo, PlayMode, PlayerState, Track};
-    use serde::Serialize;
     use serde_diff::{Apply, Diff};
     use std::time::Duration;
 
