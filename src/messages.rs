@@ -55,7 +55,7 @@ impl Display for Message {
             Message::PlayerState(_) => writeln!(f, "PlayerState"),
             Message::Unexpected(_) => writeln!(f, "Unexpected"),
             Message::UserVoiceState(_) => writeln!(f, "UserVoiceState"),
-            Message::ClientControlResult(_) => writeln!(f, "ClientControlResult")
+            Message::ClientControlResult(_) => writeln!(f, "ClientControlResult"),
         }
     }
 }
@@ -112,7 +112,6 @@ pub enum PlayerControl {
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct PlayerControlResult {
     pub uuid: String,
-    pub user: User,
     pub req: PlayerControl,
     pub res: Result<(), String>,
 }

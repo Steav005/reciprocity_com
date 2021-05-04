@@ -76,15 +76,15 @@ pub async fn get_auth_code(cfg: Config) -> Result<AuthorizationCode, OAuthError>
 
                 let mut cd = None;
                 let mut st = None;
-                for (key, value) in url.query_pairs(){
-                    if key.eq("code"){
+                for (key, value) in url.query_pairs() {
+                    if key.eq("code") {
                         cd = Some(value.into_owned());
                         continue;
                     }
-                    if key.eq("state"){
+                    if key.eq("state") {
                         st = Some(value.into_owned());
                     }
-                };
+                }
                 let cd = cd.ok_or(OAuthError::NoCodeInResponse())?;
                 code = AuthorizationCode::new(cd);
 
